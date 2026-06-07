@@ -1,4 +1,28 @@
 services:
+  everypay_mock:
+    build: .
+    container_name: everypay_web
+    restart: always
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./banking:/app/banking
+      - ./oauth:/app/oauth
+      - ./config:/app/config
+      - ./manage.py:/app/manage.py
+      - ./templates:/app/templates
+    ports:
+      - "8000:8000"
+    environment:
+      DB_URL: ${DB_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS}
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: postgres:16-alpine
     container_name: everypay_postgres
@@ -6,7 +30,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
     ports:
       - "5432:5432"
     volumes:

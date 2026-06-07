@@ -1,66 +1,247 @@
+from datetime import timedelta
 from uuid import uuid4
 from django.db import models
 from django.utils import timezone
 
 class ThirdParty(models.Model):
     """
-    Банки(Поставщики платежных услуг - ППУ) или
-    Сервисы (Сервисные поставщики информационных услуг - СПИУ)
+    Внешний сервис
+    (Банк - ППУ - поставщик платежных услуг) или
+    (СПИУ - Сервисный поставщик информационных услуг)
     """
-    TYPE_CHOICES = [("bank", "Bank"), ("service", "Service")]
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    code = models.CharField(max_length=20, unique=True)
-    name = models.CharField(max_length=100)
+    TYPE_CHOICES = [("bank", "Банк"), ("service", "Сервис")]
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, verbose_name="Тип сервиса")
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Код сервиса",
+        help_text="Например, sber, tbank"
+    )
+    name = models.CharField(max_length=50, verbose_name="Название сервиса")
     description = models.TextField(max_length=512)
 
+    class Meta:
+        verbose_name = "Внешний сервис"
+        verbose_name_plural = "Внешние сервисы"
+
     def __str__(self):
-        return self.name
+        return f"{self.name}: ({self.code})"
 
 class Company(models.Model):
     """
-    Компания, которой принадлежит счет
+    Организации, которые пользуются сервисом EveryPay для получения банковских данных.
+    Компания владеет счетами - если удалить компанию, удалятся все её счета.
     """
-    name = models.CharField(max_length=255)
-    inn = models.CharField(max_length=12, unique=True)
+    name = models.CharField(max_length=255, verbose_name="Название компании")
+    inn = models.CharField(
+        max_length=12,
+        unique=True,
+        verbose_name="ИНН компании",
+        help_text="Состоит из 12 цифр"
+    )
+
+    class Meta:
+        verbose_name = "Компания"
+        verbose_name_plural = "Компании"
 
     def __str__(self):
         return self.name
 
 class Account(models.Model):
     """
-    Банковский счет
+    Счёт, открытый в конкретном банке для конкретной компании.
+    Счет нельзя удалить, пока существует банк, к которому он привязан.
     """
-    account_id = models.CharField(max_length=255, unique=True, default=uuid4)
+    STATUS_CHOICES = [
+        ("enabled", "Активен"),
+        ("disabled", "Закрыт"),
+        ("deleted", "Удалён"),
+    ]
+    TYPE_CHOICES = [
+        ("business", "Юридическое лицо"),
+        ("personal", "Физическое лицо"),
+    ]
+    SUBTYPE_CHOICES = [
+        ("current_account", "Расчётный"),
+        ("savings", "Сберегательный"),
+        ("loan", "Кредитный"),
+    ]
+    account_id = models.UUIDField(unique=True, default=uuid4, editable=False)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="accounts")
     bank = models.ForeignKey(ThirdParty, on_delete=models.PROTECT, related_name="accounts")
-    currency = models.CharField(max_length=3, default="RUB")
+    currency = models.CharField(
+        max_length=3,
+        default="RUB",
+        verbose_name="Валюта",
+        help_text="Код валюты по ISO 4217 (RUB, USD, EUR)"
+    )
+    account_type = models.CharField(
+        max_length=20,
+        choices=TYPE_CHOICES,
+        verbose_name="Тип счета",
+        help_text="Физ/Юр лица"
+    )
+    account_sub_type = models.CharField(max_length=30, choices=SUBTYPE_CHOICES, verbose_name="Подтип счета")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="enabled")
+    bban = models.CharField(
+        max_length=34,
+        blank=True,
+        verbose_name="Номер счёта (Basic Bank Account Number)",
+        help_text="Расчетный счет, обычно 20 цифр"
+    )
+    status_update_datetime = models.DateTimeField(auto_now=True)
+    registration_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Счёт"
+        verbose_name_plural = "Счета"
 
     def __str__(self):
-        return f"{self.bank.name} - {self.company.name} ({self.account_id})"
+        return f"{self.bank.name} — {self.company.name}"
 
-class Transaction(models.Model):
+class Balance(models.Model):
     """
-    Операция по счету
+    Хранит информацию об остатках по счёту на определённый момент времени.
+    Один счёт может иметь несколько записей баланса.
     """
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="transactions")
-    transaction_id = models.CharField(max_length=255, unique=True, default=uuid4)
-    amount = models.DecimalField(max_digits=15, decimal_places=2)
-    credit_debit_indicator = models.CharField(max_length=10, choices=[("Credit", "Приход"), ("Debit", "Расход")])
-    booking_date_time = models.DateTimeField(default=timezone.now)
-    description = models.TextField(max_length=512)
+    TYPE_CHOICES = [
+        ("interim_available", "Текущий доступный"),
+        ("interim_booked", "Текущий учётный"),
+        ("opening_available", "Доступный на начало дня"),
+        ("opening_booked", "Учётный на начало дня"),
+    ]
+    CREDIT_OR_DEBIT_INDICATOR = [
+        ("credit", "Приход"),
+        ("debit", "Расход")
+    ]
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="balances")
+    amount = models.DecimalField(max_digits=19, decimal_places=2, verbose_name="Остаток денежных средств")
+    currency = models.CharField(
+        max_length=3,
+        default="RUB",
+        verbose_name="Валюта",
+        help_text="Код валюты по ISO 4217 (RUB, USD, EUR)"
+    )
+    credit_debit_indicator = models.CharField(
+        max_length=6,
+        choices=CREDIT_OR_DEBIT_INDICATOR,
+        help_text="Расход или приход денежных средств"
+    )
+    type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name="Доступность баланса")
+    datetime = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name = "Баланс"
+        verbose_name_plural = "Балансы"
+
+    def __str__(self):
+        return f"{self.account} - {self.amount} [{self.type}]"
 
 class StatementRequest(models.Model):
     """
-    Запрос на выписку (для имитации задержки в 30 сек)
+    Создаётся, когда клиент запрашивает выписку по счёту за период.
+    Статус: первые 30 секунд после создания отдаёт Processing,
+    потом автоматически становится Ready.
+    Создает имитацию асинхронной обработку.
     """
-    statement_id = models.CharField(max_length=255, unique=True, default=uuid4)
+    statement_id = models.UUIDField(unique=True, default=uuid4, editable=False)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="statement_requests")
     created_at = models.DateTimeField(auto_now_add=True)
     from_booking_date_time = models.DateTimeField()
     to_booking_date_time = models.DateTimeField()
 
+    class Meta:
+        verbose_name = "Выписка"
+        verbose_name_plural = "Выписки"
+
     @property
     def status(self):
-        if (timezone.now() - self.created_at).total_seconds() > 30:
+        if timezone.now() - self.created_at >= timedelta(seconds=30):
             return "Ready"
         return "Processing"
+
+class Transaction(models.Model):
+    """
+    Транзакция внутри выписки.
+    Привязана не к счёту напрямую, а к выписке (StatementRequest).
+    Если приход - заполняется плательщик, если расход - получатель.
+    """
+    INDICATOR_CHOICES = [
+        ("credit", "Приход"),
+        ("debit", "Расход")
+    ]
+    STATUS_CHOICES = [
+        ("booked", "Проведена"),
+        ("pending", "Ожидает")
+    ]
+    transaction_id = models.UUIDField(unique=True, default=uuid4, editable=False)
+    statement = models.ForeignKey(StatementRequest, on_delete=models.CASCADE, related_name="transactions")
+    credit_debit_indicator = models.CharField(
+        max_length=6,
+        choices=INDICATOR_CHOICES,
+        verbose_name="Тип транзакции"
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Booked")
+    booking_date_time = models.DateTimeField(verbose_name="Дата транзакции")
+    amount = models.DecimalField(max_digits=19, decimal_places=2, verbose_name="Сумма транзакции")
+    value_date_time = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата, когда деньги становятся доступны"
+    )
+    description = models.CharField(max_length=300, blank=True, verbose_name="Назначение платежа")
+    debtor_name = models.CharField(max_length=200, blank=True, verbose_name="Название плательщика")
+    debtor_account = models.CharField(max_length=34, blank=True, verbose_name="Номер счета плательщика")
+    creditor_name = models.CharField(max_length=200, blank=True, verbose_name="Название получателя")
+    creditor_account = models.CharField(max_length=34, blank=True, verbose_name="Номер счета получателя")
+    currency = models.CharField(
+        max_length=3,
+        default="RUB",
+        verbose_name="Валюта",
+        help_text="Код валюты по ISO 4217 (RUB, USD, EUR)"
+    )
+    document_number = models.CharField(
+        max_length=6,
+        blank=True,
+        verbose_name="Номер платежного поручения",
+        help_text="Обычно 6 цифр (может быть другой банковский документ)"
+    )
+    debtor_bic = models.CharField(
+        max_length=11,
+        blank=True,
+        verbose_name="БИК плательщика",
+        help_text="Обычно 11 цифр"
+    )
+    creditor_bic = models.CharField(
+        max_length=11,
+        blank=True,
+        verbose_name="БИК получателя",
+        help_text="Обычно 11 цифр"
+    )
+    tax_uip = models.CharField(
+        max_length=25,
+        blank=True,
+        verbose_name="Уникальный идентификатор платежа",
+        help_text="Уникален в пределах одного платежа. Обычно 22 символа. используется для платежей в бюджет"
+    )
+    tax_kbk = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Код бюджетной классификации",
+        help_text="Обычно 20 цифр. Определяет вид налога"
+    )
+    tax_oktmo = models.CharField(
+        max_length=11,
+        blank=True,
+        verbose_name="Код территории по ОКТМО",
+        help_text="Муниципальное образование, куда идет платеж"
+    )
+
+    class Meta:
+        verbose_name = "Транзакция"
+        verbose_name_plural = "Транзакции"
+        ordering = ["-booking_date_time"]
+
+    def __str__(self):
+        sign = "+" if self.credit_debit_indicator == "credit" else "-"
+        return f"{sign}{self.amount} / {self.description or '-'}"

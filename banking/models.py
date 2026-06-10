@@ -122,6 +122,12 @@ class StatementRequest(models.Model):
             return "Ready"
         return "Processing"
 
+    def get_transactions(self):
+        return self.account.transactions.filter(
+            booking_date_time__gte=self.from_booking_date_time,
+            booking_date_time__lte=self.to_booking_date_time,
+        )
+
 class Transaction(models.Model):
     """
     Транзакция внутри выписки.

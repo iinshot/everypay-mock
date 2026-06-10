@@ -99,44 +99,6 @@ class Account(models.Model):
     def __str__(self):
         return f"{self.bank.name} — {self.company.name}"
 
-class Balance(models.Model):
-    """
-    Хранит информацию об остатках по счёту на определённый момент времени.
-    Один счёт может иметь несколько записей баланса.
-    """
-    TYPE_CHOICES = [
-        ("interim_available", "Текущий доступный"),
-        ("interim_booked", "Текущий учётный"),
-        ("opening_available", "Доступный на начало дня"),
-        ("opening_booked", "Учётный на начало дня"),
-    ]
-    CREDIT_OR_DEBIT_INDICATOR = [
-        ("credit", "Приход"),
-        ("debit", "Расход")
-    ]
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="balances")
-    amount = models.DecimalField(max_digits=19, decimal_places=2, verbose_name="Остаток денежных средств")
-    currency = models.CharField(
-        max_length=3,
-        default="RUB",
-        verbose_name="Валюта",
-        help_text="Код валюты по ISO 4217 (RUB, USD, EUR)"
-    )
-    credit_debit_indicator = models.CharField(
-        max_length=6,
-        choices=CREDIT_OR_DEBIT_INDICATOR,
-        help_text="Расход или приход денежных средств"
-    )
-    type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name="Доступность баланса")
-    datetime = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        verbose_name = "Баланс"
-        verbose_name_plural = "Балансы"
-
-    def __str__(self):
-        return f"{self.account} - {self.amount} [{self.type}]"
-
 class StatementRequest(models.Model):
     """
     Создаётся, когда клиент запрашивает выписку по счёту за период.

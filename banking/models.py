@@ -9,7 +9,7 @@ class ThirdParty(models.Model):
     (Банк - ППУ - поставщик платежных услуг) или
     (СПИУ - Сервисный поставщик информационных услуг)
     """
-    TYPE_CHOICES = [("bank", "Банк"), ("service", "Сервис")]
+    TYPE_CHOICES = [("Bank", "Банк"), ("Service", "Сервис")]
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, verbose_name="Тип сервиса")
     code = models.CharField(
         max_length=20,
@@ -53,18 +53,18 @@ class Account(models.Model):
     Счет нельзя удалить, пока существует банк, к которому он привязан.
     """
     STATUS_CHOICES = [
-        ("enabled", "Активен"),
-        ("disabled", "Закрыт"),
-        ("deleted", "Удалён"),
+        ("Enabled", "Активен"),
+        ("Disabled", "Закрыт"),
+        ("Deleted", "Удалён"),
     ]
     TYPE_CHOICES = [
-        ("business", "Юридическое лицо"),
-        ("personal", "Физическое лицо"),
+        ("Business", "Юридическое лицо"),
+        ("Personal", "Физическое лицо"),
     ]
     SUBTYPE_CHOICES = [
-        ("current_account", "Расчётный"),
-        ("savings", "Сберегательный"),
-        ("loan", "Кредитный"),
+        ("CurrentAccount", "Расчётный"),
+        ("Savings", "Сберегательный"),
+        ("Loan", "Кредитный"),
     ]
     account_id = models.UUIDField(unique=True, default=uuid4, editable=False)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="accounts")
@@ -82,7 +82,7 @@ class Account(models.Model):
         help_text="Физ/Юр лица"
     )
     account_sub_type = models.CharField(max_length=30, choices=SUBTYPE_CHOICES, verbose_name="Подтип счета")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="enabled")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Enabled")
     bban = models.CharField(
         max_length=34,
         blank=True,
@@ -129,15 +129,15 @@ class Transaction(models.Model):
     Если приход - заполняется плательщик, если расход - получатель.
     """
     INDICATOR_CHOICES = [
-        ("credit", "Приход"),
-        ("debit", "Расход")
+        ("Credit", "Приход"),
+        ("Debit", "Расход")
     ]
     STATUS_CHOICES = [
-        ("booked", "Проведена"),
-        ("pending", "Ожидает")
+        ("Booked", "Проведена"),
+        ("Pending", "Ожидает")
     ]
     transaction_id = models.UUIDField(unique=True, default=uuid4, editable=False)
-    statement = models.ForeignKey(StatementRequest, on_delete=models.CASCADE, related_name="transactions")
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="transactions")
     credit_debit_indicator = models.CharField(
         max_length=6,
         choices=INDICATOR_CHOICES,
@@ -205,5 +205,5 @@ class Transaction(models.Model):
         ordering = ["-booking_date_time"]
 
     def __str__(self):
-        sign = "+" if self.credit_debit_indicator == "credit" else "-"
+        sign = "+" if self.credit_debit_indicator == "Credit" else "-"
         return f"{sign}{self.amount} / {self.description or '-'}"

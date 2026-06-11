@@ -22,6 +22,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - everypay_network
 
   db:
     image: postgres:16-alpine
@@ -40,6 +42,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - everypay_network
+
+networks:
+  everypay_network:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -21,8 +21,10 @@ from banking.serializers import (
 )
 from banking.services import AccountService, StatementService
 
+
 def _links(request) -> LinksInfo:
     return LinksInfo(self=request.build_absolute_uri())
+
 
 class PartiesController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
@@ -44,6 +46,7 @@ class PartiesController(Controller[PydanticSerializer]):
             ),
             Links=_links(request),
         )
+
 
 class AccountsController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
@@ -69,6 +72,7 @@ class AccountsController(Controller[PydanticSerializer]):
             Links=_links(request),
         )
 
+
 class AccountDetailController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
@@ -92,6 +96,7 @@ class AccountDetailController(Controller[PydanticSerializer]):
             ),
             Links=_links(request),
         )
+
 
 class StatementsController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
@@ -119,6 +124,7 @@ class StatementsController(Controller[PydanticSerializer]):
             ),
             Links=_links(request),
         )
+
 
 class StatementDetailController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)

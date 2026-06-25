@@ -2,11 +2,14 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 from uuid import UUID
 
+
 class MetaInfo(BaseModel):
     totalPages: int = 1
 
+
 class LinksInfo(BaseModel):
     self: str
+
 
 class AccountOut(BaseModel):
     accountId: UUID
@@ -16,8 +19,10 @@ class AccountOut(BaseModel):
     status: str
     bban: Optional[str] = None
 
+
 class AccountData(BaseModel):
     Account: List[AccountOut]
+
 
 class AccountResponse(BaseModel):
     Data: AccountData
@@ -25,23 +30,29 @@ class AccountResponse(BaseModel):
     Links: LinksInfo
     Meta: MetaInfo = Field(default_factory=MetaInfo)
 
+
 class StatementCreateBody(BaseModel):
     fromBookingDateTime: str
     toBookingDateTime: str
 
+
 class StatementBodyWrapper(BaseModel):
     Statement: StatementCreateBody
 
+
 class StatementRequestBody(BaseModel):
     Data: StatementBodyWrapper
+
 
 class StatementInitOut(BaseModel):
     statementId: UUID
     accountId: UUID
     status: str
 
+
 class StatementInitData(BaseModel):
     Statement: List[StatementInitOut]
+
 
 class StatementInitResponse(BaseModel):
     Data: StatementInitData
@@ -49,20 +60,24 @@ class StatementInitResponse(BaseModel):
     Links: LinksInfo
     Meta: MetaInfo = Field(default_factory=MetaInfo)
 
+
 class ThirdPartyOut(BaseModel):
     type: str
     code: str
     name: str
     description: str
 
+
 class ThirdPartyData(BaseModel):
     ThirdParty: List[ThirdPartyOut]
+
 
 class ThirdPartyResponse(BaseModel):
     Data: ThirdPartyData
     Risk: Dict = Field(default_factory=dict)
     Links: LinksInfo
     Meta: MetaInfo = Field(default_factory=MetaInfo)
+
 
 class TransactionOut(BaseModel):
     transactionId: UUID
@@ -77,6 +92,7 @@ class TransactionOut(BaseModel):
     creditorName: Optional[str] = None
     creditorAccount: Optional[str] = None
 
+
 class StatementDetailOut(BaseModel):
     statementId: UUID
     accountId: UUID
@@ -85,8 +101,10 @@ class StatementDetailOut(BaseModel):
     toBookingDateTime: str
     Transaction: Optional[List[TransactionOut]] = None
 
+
 class StatementDetailData(BaseModel):
     Statement: List[StatementDetailOut]
+
 
 class StatementDetailResponse(BaseModel):
     Data: StatementDetailData

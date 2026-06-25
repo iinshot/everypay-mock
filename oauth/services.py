@@ -2,13 +2,21 @@ import secrets
 from datetime import timedelta
 from django.utils import timezone
 from banking.models import Company, ThirdParty
-from .models import AccessToken, OAuthClient, PKCEAuthorizationCode, RefreshToken, ThirdPartyCode
+from .models import (
+    AccessToken,
+    OAuthClient,
+    PKCEAuthorizationCode,
+    RefreshToken,
+    ThirdPartyCode,
+)
+
 
 class OAuthError(Exception):
     def __init__(self, message: str, status: int = 400):
         self.message = message
         self.status = status
         super().__init__(message)
+
 
 class ThirdPartyCodeService:
     @staticmethod
@@ -28,9 +36,12 @@ class ThirdPartyCodeService:
             expires_at=timezone.now() + timedelta(minutes=10),
         )
 
+
 class AuthorizeService:
     @staticmethod
-    def validate_get_params(client_id: str, redirect_uri: str, code: str, third_party_code: str):
+    def validate_get_params(
+        client_id: str, redirect_uri: str, code: str, third_party_code: str
+    ):
         try:
             client = OAuthClient.objects.select_related("company").get(
                 client_id=client_id, is_active=True
@@ -108,6 +119,7 @@ class AuthorizeService:
             expires_at=timezone.now() + timedelta(minutes=10),
         )
 
+
 class TokenService:
     @staticmethod
     def exchange_code(
@@ -148,7 +160,9 @@ class TokenService:
         )
 
     @staticmethod
-    def refresh(client_id: str, refresh_token_value: str) -> tuple[AccessToken, RefreshToken]:
+    def refresh(
+        client_id: str, refresh_token_value: str
+    ) -> tuple[AccessToken, RefreshToken]:
         try:
             client = OAuthClient.objects.get(client_id=client_id, is_active=True)
         except OAuthClient.DoesNotExist:
@@ -176,7 +190,10 @@ class TokenService:
             scope=old_refresh.access_token.scope,
         )
 
-def _create_token_pair(client, company, third_party, scope) -> tuple[AccessToken, RefreshToken]:
+
+def _create_token_pair(
+    client, company, third_party, scope
+) -> tuple[AccessToken, RefreshToken]:
     access_token = AccessToken.objects.create(
         token=secrets.token_urlsafe(32),
         client=client,

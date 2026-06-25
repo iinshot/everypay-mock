@@ -3,6 +3,7 @@ from dmr.security import SyncAuth
 from dmr.openapi.objects import SecurityScheme
 from oauth.models import AccessToken
 
+
 class BearerTokenAuth(SyncAuth):
     """
     Кастомный Bearer auth для dmr.

@@ -1,34 +1,95 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict
+from uuid import UUID
 
-class Meta(BaseModel):
+class MetaInfo(BaseModel):
     totalPages: int = 1
 
-class Links(BaseModel):
+class LinksInfo(BaseModel):
     self: str
 
-class AccountSchema(BaseModel):
-    accountId: str
+class AccountOut(BaseModel):
+    accountId: UUID
     currency: str
-    accountType: str = "Business"
-    accountSubType: str = "CurrentAccount"
+    accountType: str
+    accountSubType: str
+    status: str
+    bban: Optional[str] = None
 
 class AccountData(BaseModel):
-    Account: List[AccountSchema]
+    Account: List[AccountOut]
 
 class AccountResponse(BaseModel):
     Data: AccountData
-    Risk: dict = {}
-    Links: Links
-    Meta: Meta
+    Risk: Dict = Field(default_factory=dict)
+    Links: LinksInfo
+    Meta: MetaInfo = Field(default_factory=MetaInfo)
 
-class StatementInitData(BaseModel):
-    accountId: str
-    statementId: str
+class StatementCreateBody(BaseModel):
+    fromBookingDateTime: str
+    toBookingDateTime: str
+
+class StatementBodyWrapper(BaseModel):
+    Statement: StatementCreateBody
+
+class StatementRequestBody(BaseModel):
+    Data: StatementBodyWrapper
+
+class StatementInitOut(BaseModel):
+    statementId: UUID
+    accountId: UUID
     status: str
 
+class StatementInitData(BaseModel):
+    Statement: List[StatementInitOut]
+
 class StatementInitResponse(BaseModel):
-    Data: dict
-    Risk: dict = {}
-    Links: Links
-    Meta: Meta
+    Data: StatementInitData
+    Risk: Dict = Field(default_factory=dict)
+    Links: LinksInfo
+    Meta: MetaInfo = Field(default_factory=MetaInfo)
+
+class ThirdPartyOut(BaseModel):
+    type: str
+    code: str
+    name: str
+    description: str
+
+class ThirdPartyData(BaseModel):
+    ThirdParty: List[ThirdPartyOut]
+
+class ThirdPartyResponse(BaseModel):
+    Data: ThirdPartyData
+    Risk: Dict = Field(default_factory=dict)
+    Links: LinksInfo
+    Meta: MetaInfo = Field(default_factory=MetaInfo)
+
+class TransactionOut(BaseModel):
+    transactionId: UUID
+    creditDebitIndicator: str
+    status: str
+    bookingDateTime: str
+    amount: str
+    currency: str
+    description: Optional[str] = None
+    debtorName: Optional[str] = None
+    debtorAccount: Optional[str] = None
+    creditorName: Optional[str] = None
+    creditorAccount: Optional[str] = None
+
+class StatementDetailOut(BaseModel):
+    statementId: UUID
+    accountId: UUID
+    status: str
+    fromBookingDateTime: str
+    toBookingDateTime: str
+    Transaction: Optional[List[TransactionOut]] = None
+
+class StatementDetailData(BaseModel):
+    Statement: List[StatementDetailOut]
+
+class StatementDetailResponse(BaseModel):
+    Data: StatementDetailData
+    Risk: Dict = Field(default_factory=dict)
+    Links: LinksInfo
+    Meta: MetaInfo = Field(default_factory=MetaInfo)

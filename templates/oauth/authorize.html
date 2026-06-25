@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Подтверждение доступа — EveryPay</title>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 60px auto; padding: 0 20px; }
+        h1 { font-size: 1.4rem; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 24px; }
+        select, button { width: 100%; padding: 10px; margin-top: 12px; font-size: 1rem; box-sizing: border-box; }
+        button { background: #1a56db; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #1e429f; }
+        .meta { color: #666; font-size: 0.9rem; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Запрос доступа</h1>
+        <p>Приложение <strong>{{ client.name }}</strong> запрашивает доступ к данным в банке <strong>{{ third_party.name }}</strong>.</p>
+        <p class="meta">Scope: {{ params.scope }}</p>
+
+        <form method="post" action="/oauth/authorize">
+            {% csrf_token %}
+            <input type="hidden" name="client_id"             value="{{ params.client_id }}">
+            <input type="hidden" name="redirect_uri"          value="{{ params.redirect_uri }}">
+            <input type="hidden" name="code_challenge"        value="{{ params.code_challenge }}">
+            <input type="hidden" name="code_challenge_method" value="{{ params.code_challenge_method }}">
+            <input type="hidden" name="state"                 value="{{ params.state }}">
+            <input type="hidden" name="scope"                 value="{{ params.scope }}">
+            <input type="hidden" name="code"                  value="{{ params.code }}">
+            <input type="hidden" name="third_party"           value="{{ params.third_party }}">
+
+            <label for="company">Выберите компанию:</label>
+            <select name="company_id" id="company" required>
+                {% for company in companies %}
+                    <option value="{{ company.id }}">{{ company.name }} (ИНН: {{ company.inn }})</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Разрешить доступ</button>
+        </form>
+    </div>
+</body>
+</html>

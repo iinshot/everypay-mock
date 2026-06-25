@@ -1,6 +1,6 @@
 from dmr import Body, Controller
 from dmr.plugins.pydantic import PydanticSerializer
-from banking.auth import BearerTokenAuth
+from oauth.auth import BearerTokenAuth
 from banking.models import ThirdParty
 from banking.serializers import (
     AccountOut,

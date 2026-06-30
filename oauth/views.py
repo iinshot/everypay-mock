@@ -1,10 +1,12 @@
 import base64
 import json
+
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+
 from .services import AuthorizeService, OAuthError, ThirdPartyCodeService, TokenService
 
 
@@ -131,5 +133,5 @@ class TokenView(View):
                 "expires_in": 3600,
                 "refresh_token": refresh_token.token,
                 "scope": access_token.scope,
-            }
+            },
         )

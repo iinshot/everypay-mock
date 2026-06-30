@@ -1,5 +1,6 @@
-import environ
 from pathlib import Path
+
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,7 +41,8 @@ MIDDLEWARE = [
 OAUTH2_PROVIDER = {
     "ACCESS_TOKEN_EXPIRE_SECONDS": env.int("ACCESS_TOKEN_EXPIRE_SECONDS", default=3600),
     "REFRESH_TOKEN_EXPIRE_SECONDS": env.int(
-        "REFRESH_TOKEN_EXPIRE_SECONDS", default=86400
+        "REFRESH_TOKEN_EXPIRE_SECONDS",
+        default=86400,
     ),
     "PKCE_REQUIRED": env.bool("PKCE_REQUIRED", default=True),
     "OIDC_ENABLED": False,
@@ -93,7 +95,7 @@ DATABASES = {
         "HOST": env("POSTGRES_HOST"),
         "PORT": env("POSTGRES_PORT"),
         "ATOMIC_REQUESTS": True,
-    }
+    },
 }
 
 # Password validation

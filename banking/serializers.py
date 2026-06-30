@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 class MetaInfo(BaseModel):

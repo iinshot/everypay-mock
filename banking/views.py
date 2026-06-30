@@ -1,25 +1,26 @@
 from dmr import Body, Controller
 from dmr.plugins.pydantic import PydanticSerializer
-from oauth.auth import BearerTokenAuth
+
 from banking.models import ThirdParty
 from banking.serializers import (
-    AccountOut,
     AccountData,
+    AccountOut,
     AccountResponse,
     LinksInfo,
-    StatementInitOut,
+    StatementDetailData,
+    StatementDetailOut,
+    StatementDetailResponse,
     StatementInitData,
+    StatementInitOut,
     StatementInitResponse,
     StatementRequestBody,
-    StatementDetailOut,
-    StatementDetailData,
-    StatementDetailResponse,
-    ThirdPartyOut,
     ThirdPartyData,
+    ThirdPartyOut,
     ThirdPartyResponse,
     TransactionOut,
 )
 from banking.services import AccountService, StatementService
+from oauth.auth import BearerTokenAuth
 
 
 def _links(request) -> LinksInfo:
@@ -42,7 +43,7 @@ class PartiesController(Controller[PydanticSerializer]):
                         description=p.description,
                     )
                     for p in parties
-                ]
+                ],
             ),
             Links=_links(request),
         )
@@ -67,7 +68,7 @@ class AccountsController(Controller[PydanticSerializer]):
                         bban=acc.bban or None,
                     )
                     for acc in accounts
-                ]
+                ],
             ),
             Links=_links(request),
         )
@@ -91,8 +92,8 @@ class AccountDetailController(Controller[PydanticSerializer]):
                         accountSubType=acc.account_sub_type,
                         status=acc.status,
                         bban=acc.bban or None,
-                    )
-                ]
+                    ),
+                ],
             ),
             Links=_links(request),
         )
@@ -119,8 +120,8 @@ class StatementsController(Controller[PydanticSerializer]):
                         statementId=stmt.statement_id,
                         accountId=acc.account_id,
                         status=stmt.status,
-                    )
-                ]
+                    ),
+                ],
             ),
             Links=_links(request),
         )
@@ -163,8 +164,8 @@ class StatementDetailController(Controller[PydanticSerializer]):
                         fromBookingDateTime=stmt.from_booking_date_time.isoformat(),
                         toBookingDateTime=stmt.to_booking_date_time.isoformat(),
                         Transaction=transactions,
-                    )
-                ]
+                    ),
+                ],
             ),
             Links=_links(request),
         )

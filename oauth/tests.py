@@ -1,15 +1,17 @@
 import base64
 import json
+from datetime import timedelta
+
 import pytest
 from django.utils import timezone
-from datetime import timedelta
-from banking.models import ThirdParty, Company, Account
+
+from banking.models import Account, Company, ThirdParty
 from oauth.models import (
-    OAuthClient,
-    ThirdPartyCode,
-    PKCEAuthorizationCode,
     AccessToken,
+    OAuthClient,
+    PKCEAuthorizationCode,
     RefreshToken,
+    ThirdPartyCode,
 )
 
 pytestmark = pytest.mark.django_db
@@ -60,7 +62,7 @@ def oauth_client(company):
 @pytest.fixture
 def basic_auth_headers(oauth_client):
     credentials = base64.b64encode(
-        f"{oauth_client.client_id}:{oauth_client.client_secret}".encode()
+        f"{oauth_client.client_id}:{oauth_client.client_secret}".encode(),
     ).decode()
     return {"HTTP_AUTHORIZATION": f"Basic {credentials}"}
 
@@ -156,7 +158,7 @@ def test_third_party_code_no_auth(client):
 
 def test_third_party_code_wrong_secret(client, oauth_client):
     credentials = base64.b64encode(
-        f"{oauth_client.client_id}:wrong-secret".encode()
+        f"{oauth_client.client_id}:wrong-secret".encode(),
     ).decode()
     response = client.post(
         "/oauth/third-party-code",
@@ -168,7 +170,11 @@ def test_third_party_code_wrong_secret(client, oauth_client):
 
 
 def test_authorize_get_shows_form(
-    client, oauth_client, third_party_code, bank, account
+    client,
+    oauth_client,
+    third_party_code,
+    bank,
+    account,
 ):
     response = client.get(
         "/oauth/authorize",
@@ -203,7 +209,10 @@ def test_authorize_get_invalid_client(client, third_party_code, bank):
 
 
 def test_authorize_get_invalid_redirect_uri(
-    client, oauth_client, third_party_code, bank
+    client,
+    oauth_client,
+    third_party_code,
+    bank,
 ):
     response = client.get(
         "/oauth/authorize",
@@ -246,7 +255,7 @@ def test_token_exchange_code_success(client, pkce_auth_code):
                 "code_verifier": "test-challenge",  # plain method: verifier == challenge
                 "client_id": pkce_auth_code.client.client_id,
                 "redirect_uri": pkce_auth_code.redirect_uri,
-            }
+            },
         ),
         content_type="application/json",
     )
@@ -268,7 +277,7 @@ def test_token_exchange_code_marks_as_used(client, pkce_auth_code):
                 "code_verifier": "test-challenge",
                 "client_id": pkce_auth_code.client.client_id,
                 "redirect_uri": pkce_auth_code.redirect_uri,
-            }
+            },
         ),
         content_type="application/json",
     )
@@ -284,11 +293,13 @@ def test_token_exchange_code_cannot_reuse(client, pkce_auth_code):
             "code_verifier": "test-challenge",
             "client_id": pkce_auth_code.client.client_id,
             "redirect_uri": pkce_auth_code.redirect_uri,
-        }
+        },
     )
     client.post("/oauth/token", data=payload, content_type="application/json")
     response = client.post(
-        "/oauth/token", data=payload, content_type="application/json"
+        "/oauth/token",
+        data=payload,
+        content_type="application/json",
     )
     assert response.status_code == 400
     assert response.json()["error"] == "Code expired or already used"
@@ -304,7 +315,7 @@ def test_token_exchange_invalid_pkce(client, pkce_auth_code):
                 "code_verifier": "wrong-verifier",
                 "client_id": pkce_auth_code.client.client_id,
                 "redirect_uri": pkce_auth_code.redirect_uri,
-            }
+            },
         ),
         content_type="application/json",
     )
@@ -322,7 +333,7 @@ def test_token_exchange_redirect_uri_mismatch(client, pkce_auth_code):
                 "code_verifier": "test-challenge",
                 "client_id": pkce_auth_code.client.client_id,
                 "redirect_uri": "http://wrong.com/callback",
-            }
+            },
         ),
         content_type="application/json",
     )
@@ -338,7 +349,7 @@ def test_token_refresh_success(client, refresh_token):
                 "grant_type": "refresh_token",
                 "refresh_token": refresh_token.token,
                 "client_id": refresh_token.access_token.client.client_id,
-            }
+            },
         ),
         content_type="application/json",
     )
@@ -346,7 +357,6 @@ def test_token_refresh_success(client, refresh_token):
     assert response.status_code == 200
     assert "access_token" in data
     assert "refresh_token" in data
-    # Новые токены должны отличаться от старых
     assert data["access_token"] != refresh_token.access_token.token
     assert data["refresh_token"] != refresh_token.token
 
@@ -360,7 +370,7 @@ def test_token_refresh_revokes_old_access_token(client, refresh_token):
                 "grant_type": "refresh_token",
                 "refresh_token": refresh_token.token,
                 "client_id": old_access_token.client.client_id,
-            }
+            },
         ),
         content_type="application/json",
     )
@@ -374,11 +384,13 @@ def test_token_refresh_cannot_reuse(client, refresh_token):
             "grant_type": "refresh_token",
             "refresh_token": refresh_token.token,
             "client_id": refresh_token.access_token.client.client_id,
-        }
+        },
     )
     client.post("/oauth/token", data=payload, content_type="application/json")
     response = client.post(
-        "/oauth/token", data=payload, content_type="application/json"
+        "/oauth/token",
+        data=payload,
+        content_type="application/json",
     )
     assert response.status_code == 400
     assert response.json()["error"] == "Refresh token expired or already used"
@@ -405,7 +417,7 @@ def test_token_refresh_expired(client, oauth_client, company, bank):
                 "grant_type": "refresh_token",
                 "refresh_token": expired_refresh.token,
                 "client_id": oauth_client.client_id,
-            }
+            },
         ),
         content_type="application/json",
     )

@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import ThirdPartyCodeView, AuthorizeView, TokenView
+
+from .views import AuthorizeView, ThirdPartyCodeView, TokenView
 
 urlpatterns = [
     path("third-party-code", ThirdPartyCodeView.as_view()),

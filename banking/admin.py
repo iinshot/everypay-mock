@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import ThirdParty, Company, Account, StatementRequest, Transaction
+
+from .models import Account, Company, StatementRequest, ThirdParty, Transaction
 
 
 class StatementInline(admin.TabularInline):

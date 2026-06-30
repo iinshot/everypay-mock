@@ -1,5 +1,6 @@
 from datetime import timedelta
 from uuid import uuid4
+
 from django.db import models
 from django.utils import timezone
 
@@ -13,7 +14,9 @@ class ThirdParty(models.Model):
 
     TYPE_CHOICES = [("Bank", "Банк"), ("Service", "Сервис")]
     type = models.CharField(
-        max_length=10, choices=TYPE_CHOICES, verbose_name="Тип сервиса"
+        max_length=10,
+        choices=TYPE_CHOICES,
+        verbose_name="Тип сервиса",
     )
     code = models.CharField(
         max_length=20,
@@ -76,10 +79,14 @@ class Account(models.Model):
     ]
     account_id = models.UUIDField(unique=True, default=uuid4, editable=False)
     company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name="accounts"
+        Company,
+        on_delete=models.CASCADE,
+        related_name="accounts",
     )
     bank = models.ForeignKey(
-        ThirdParty, on_delete=models.PROTECT, related_name="accounts"
+        ThirdParty,
+        on_delete=models.PROTECT,
+        related_name="accounts",
     )
     currency = models.CharField(
         max_length=3,
@@ -94,7 +101,9 @@ class Account(models.Model):
         help_text="Физ/Юр лица",
     )
     account_sub_type = models.CharField(
-        max_length=30, choices=SUBTYPE_CHOICES, verbose_name="Подтип счета"
+        max_length=30,
+        choices=SUBTYPE_CHOICES,
+        verbose_name="Подтип счета",
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Enabled")
     bban = models.CharField(
@@ -124,7 +133,9 @@ class StatementRequest(models.Model):
 
     statement_id = models.UUIDField(unique=True, default=uuid4, editable=False)
     account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name="statement_requests"
+        Account,
+        on_delete=models.CASCADE,
+        related_name="statement_requests",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     from_booking_date_time = models.DateTimeField()
@@ -158,33 +169,51 @@ class Transaction(models.Model):
     STATUS_CHOICES = [("Booked", "Проведена"), ("Pending", "Ожидает")]
     transaction_id = models.UUIDField(unique=True, default=uuid4, editable=False)
     account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name="transactions"
+        Account,
+        on_delete=models.CASCADE,
+        related_name="transactions",
     )
     credit_debit_indicator = models.CharField(
-        max_length=6, choices=INDICATOR_CHOICES, verbose_name="Тип транзакции"
+        max_length=6,
+        choices=INDICATOR_CHOICES,
+        verbose_name="Тип транзакции",
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Booked")
     booking_date_time = models.DateTimeField(verbose_name="Дата транзакции")
     amount = models.DecimalField(
-        max_digits=19, decimal_places=2, verbose_name="Сумма транзакции"
+        max_digits=19,
+        decimal_places=2,
+        verbose_name="Сумма транзакции",
     )
     value_date_time = models.DateTimeField(
-        null=True, blank=True, verbose_name="Дата, когда деньги становятся доступны"
+        null=True,
+        blank=True,
+        verbose_name="Дата, когда деньги становятся доступны",
     )
     description = models.CharField(
-        max_length=300, blank=True, verbose_name="Назначение платежа"
+        max_length=300,
+        blank=True,
+        verbose_name="Назначение платежа",
     )
     debtor_name = models.CharField(
-        max_length=200, blank=True, verbose_name="Название плательщика"
+        max_length=200,
+        blank=True,
+        verbose_name="Название плательщика",
     )
     debtor_account = models.CharField(
-        max_length=34, blank=True, verbose_name="Номер счета плательщика"
+        max_length=34,
+        blank=True,
+        verbose_name="Номер счета плательщика",
     )
     creditor_name = models.CharField(
-        max_length=200, blank=True, verbose_name="Название получателя"
+        max_length=200,
+        blank=True,
+        verbose_name="Название получателя",
     )
     creditor_account = models.CharField(
-        max_length=34, blank=True, verbose_name="Номер счета получателя"
+        max_length=34,
+        blank=True,
+        verbose_name="Номер счета получателя",
     )
     currency = models.CharField(
         max_length=3,
@@ -214,7 +243,8 @@ class Transaction(models.Model):
         max_length=25,
         blank=True,
         verbose_name="Уникальный идентификатор платежа",
-        help_text="Уникален в пределах одного платежа. Обычно 22 символа. используется для платежей в бюджет",
+        help_text="Уникален в пределах одного платежа. "
+        "Обычно 22 символа. используется для платежей в бюджет",
     )
     tax_kbk = models.CharField(
         max_length=20,

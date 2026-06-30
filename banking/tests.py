@@ -1,9 +1,11 @@
-import pytest
 import json
-from banking.models import ThirdParty, Company, Account
-from oauth.models import AccessToken, OAuthClient
-from django.utils import timezone
 from datetime import timedelta
+
+import pytest
+from django.utils import timezone
+
+from banking.models import Account, Company, ThirdParty
+from oauth.models import AccessToken, OAuthClient
 
 pytestmark = pytest.mark.django_db
 
@@ -105,8 +107,8 @@ def test_create_statement(client, account, auth_headers):
             "Statement": {
                 "fromBookingDateTime": "2026-01-01T00:00:00Z",
                 "toBookingDateTime": "2026-12-31T00:00:00Z",
-            }
-        }
+            },
+        },
     }
     response = client.post(
         f"/api/statements/{account.account_id}/",

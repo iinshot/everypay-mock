@@ -28,7 +28,9 @@ class Migration(migrations.Migration):
                 (
                     "client_id",
                     models.CharField(
-                        max_length=100, unique=True, verbose_name="Client ID"
+                        max_length=100,
+                        unique=True,
+                        verbose_name="Client ID",
                     ),
                 ),
                 (

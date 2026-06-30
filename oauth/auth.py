@@ -1,6 +1,7 @@
 from dmr.exceptions import NotAuthenticatedError
-from dmr.security import SyncAuth
 from dmr.openapi.objects import SecurityScheme
+from dmr.security import SyncAuth
+
 from oauth.models import AccessToken
 
 
@@ -43,7 +44,7 @@ class BearerTokenAuth(SyncAuth):
                 type="http",
                 scheme="bearer",
                 description="EveryPay Bearer token",
-            )
+            ),
         }
 
     @property

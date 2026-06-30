@@ -1,7 +1,10 @@
 import secrets
 from datetime import timedelta
+
 from django.utils import timezone
+
 from banking.models import Company, ThirdParty
+
 from .models import (
     AccessToken,
     OAuthClient,
@@ -40,11 +43,15 @@ class ThirdPartyCodeService:
 class AuthorizeService:
     @staticmethod
     def validate_get_params(
-        client_id: str, redirect_uri: str, code: str, third_party_code: str
+        client_id: str,
+        redirect_uri: str,
+        code: str,
+        third_party_code: str,
     ):
         try:
             client = OAuthClient.objects.select_related("company").get(
-                client_id=client_id, is_active=True
+                client_id=client_id,
+                is_active=True,
             )
         except OAuthClient.DoesNotExist:
             raise OAuthError("Invalid client_id", 400)
@@ -135,7 +142,8 @@ class TokenService:
 
         try:
             auth_code = PKCEAuthorizationCode.objects.select_related(
-                "company", "third_party"
+                "company",
+                "third_party",
             ).get(code=code_value, client=client)
         except PKCEAuthorizationCode.DoesNotExist:
             raise OAuthError("Invalid code", 400)
@@ -161,7 +169,8 @@ class TokenService:
 
     @staticmethod
     def refresh(
-        client_id: str, refresh_token_value: str
+        client_id: str,
+        refresh_token_value: str,
     ) -> tuple[AccessToken, RefreshToken]:
         try:
             client = OAuthClient.objects.get(client_id=client_id, is_active=True)
@@ -192,7 +201,10 @@ class TokenService:
 
 
 def _create_token_pair(
-    client, company, third_party, scope
+    client,
+    company,
+    third_party,
+    scope,
 ) -> tuple[AccessToken, RefreshToken]:
     access_token = AccessToken.objects.create(
         token=secrets.token_urlsafe(32),

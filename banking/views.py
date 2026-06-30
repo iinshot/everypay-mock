@@ -1,3 +1,6 @@
+from typing import cast
+
+from django.http import HttpRequest
 from dmr import Body, Controller
 from dmr.plugins.pydantic import PydanticSerializer
 
@@ -21,6 +24,11 @@ from banking.serializers import (
 )
 from banking.services import AccountService, StatementService
 from oauth.auth import BearerTokenAuth
+from oauth.models import AccessToken
+
+
+class AuthenticatedRequest(HttpRequest):
+    access_token: AccessToken
 
 
 def _links(request) -> LinksInfo:
@@ -53,7 +61,7 @@ class AccountsController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def get(self) -> AccountResponse:
-        request = self.request
+        request = cast(AuthenticatedRequest, self.request)
         token = request.access_token
         accounts = AccountService.get_accounts(token.company)
         return AccountResponse(
@@ -78,7 +86,7 @@ class AccountDetailController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def get(self) -> AccountResponse:
-        request = self.request
+        request = cast(AuthenticatedRequest, self.request)
         account_id = self.kwargs["account_id"]
         token = request.access_token
         acc = AccountService.get_account(account_id, token.company)
@@ -103,7 +111,7 @@ class StatementsController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def post(self, parsed_body: Body[StatementRequestBody]) -> StatementInitResponse:
-        request = self.request
+        request = cast(AuthenticatedRequest, self.request)
         account_id = self.kwargs["account_id"]
         token = request.access_token
         acc = AccountService.get_account(account_id, token.company)
@@ -131,7 +139,7 @@ class StatementDetailController(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def get(self) -> StatementDetailResponse:
-        request = self.request
+        request = cast(AuthenticatedRequest, self.request)
         account_id = self.kwargs["account_id"]
         statement_id = self.kwargs["statement_id"]
         token = request.access_token

@@ -64,10 +64,9 @@ class StatementRequestAdmin(admin.ModelAdmin):
     list_display = ("statement_id", "account", "created_at", "status_display")
     readonly_fields = ("statement_id", "created_at")
 
+    @admin.display(description="Статус")
     def status_display(self, obj):
-        return obj.status
-
-    status_display.short_description = "Статус"
+        return obj.status.name
 
 
 @admin.register(Transaction)

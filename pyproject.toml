@@ -8,6 +8,7 @@ dependencies = [
     "django-cors-headers>=4.9.0",
     "django-environ>=0.13.0",
     "django-modern-rest[jwt]>=0.10.0",
+    "environ>=1.0",
     "jwt>=1.4.0",
     "psycopg>=3.3.4",
     "psycopg2-binary>=2.9.12",
@@ -22,6 +23,7 @@ dev = [
     "ruff>=0.15.15",
     "mypy",
     "django-stubs",
+    "pre-commit>=4.6.0",
 ]
 
 [tool.ruff]
@@ -55,13 +57,14 @@ line-ending = "lf"
 known-first-party = ["config", "banking", "oauth"]
 
 [tool.mypy]
+plugins = ["mypy_django_plugin.main"]
 check_untyped_defs = true
 ignore_missing_imports = true
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
 
-[tool.mypy.plugins.django-stubs]
+[tool.django-stubs]
 django_settings_module = "config.settings"
 
 [tool.pytest.ini_options]

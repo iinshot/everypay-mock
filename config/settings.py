@@ -18,7 +18,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "oauth2_provider",
     "corsheaders",
     "dmr",
     "banking",
@@ -32,35 +31,9 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-# OAuth2 Provider
-OAUTH2_PROVIDER = {
-    "ACCESS_TOKEN_EXPIRE_SECONDS": env.int("ACCESS_TOKEN_EXPIRE_SECONDS", default=3600),
-    "REFRESH_TOKEN_EXPIRE_SECONDS": env.int(
-        "REFRESH_TOKEN_EXPIRE_SECONDS",
-        default=86400,
-    ),
-    "PKCE_REQUIRED": env.bool("PKCE_REQUIRED", default=True),
-    "OIDC_ENABLED": False,
-    "AUTHORIZATION_CODE_EXPIRE_SECONDS": 600,
-    "CLIENT_ID_GENERATOR_CLASS": "oauth2_provider.generators.ClientIdGenerator",
-    "CLIENT_SECRET_GENERATOR_CLASS": "oauth2_provider.generators.ClientSecretGenerator",
-    "SCOPES": {
-        "iapi/third-parties": "Получение списка сторон",
-        "iapi/accounts": "Доступ к информации о счете",
-    },
-    "ALLOWED_GRANT_TYPES": [
-        "authorization-code",
-        "refresh-token",
-        "client-credentials",
-    ],
-    "REQUEST_APPROVAL_PROMPT": "auto",
-    "ALLOWED_REDIRECT_URI_SCHEMES": ["https", "http"],
-}
 
 CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=DEBUG)
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")

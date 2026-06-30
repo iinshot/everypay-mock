@@ -6,21 +6,21 @@ from . import views
 router = Router(
     "api/",
     [
-        path("third-parties/", views.PartiesController.as_view(), name="third-parties"),
-        path("accounts/", views.AccountsController.as_view(), name="accounts"),
+        path("third-parties/", views.PartiesView.as_view(), name="third-parties"),
+        path("accounts/", views.AccountsView.as_view(), name="accounts"),
         path(
             "accounts/<uuid:account_id>/",
-            views.AccountDetailController.as_view(),
+            views.AccountDetailView.as_view(),
             name="account-detail",
         ),
         path(
             "statements/<uuid:account_id>/",
-            views.StatementsController.as_view(),
+            views.StatementsView.as_view(),
             name="statements",
         ),
         path(
             "accounts/<uuid:account_id>/statements/<uuid:statement_id>/",
-            views.StatementDetailController.as_view(),
+            views.StatementDetailView.as_view(),
             name="statement-detail",
         ),
     ],

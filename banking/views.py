@@ -35,7 +35,7 @@ def _links(request) -> LinksInfo:
     return LinksInfo(self=request.build_absolute_uri())
 
 
-class PartiesController(Controller[PydanticSerializer]):
+class PartiesView(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def get(self) -> ThirdPartyResponse:
@@ -57,7 +57,7 @@ class PartiesController(Controller[PydanticSerializer]):
         )
 
 
-class AccountsController(Controller[PydanticSerializer]):
+class AccountsView(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def get(self) -> AccountResponse:
@@ -82,7 +82,7 @@ class AccountsController(Controller[PydanticSerializer]):
         )
 
 
-class AccountDetailController(Controller[PydanticSerializer]):
+class AccountDetailView(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def get(self) -> AccountResponse:
@@ -107,7 +107,7 @@ class AccountDetailController(Controller[PydanticSerializer]):
         )
 
 
-class StatementsController(Controller[PydanticSerializer]):
+class StatementsView(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def post(self, parsed_body: Body[StatementRequestBody]) -> StatementInitResponse:
@@ -135,7 +135,7 @@ class StatementsController(Controller[PydanticSerializer]):
         )
 
 
-class StatementDetailController(Controller[PydanticSerializer]):
+class StatementDetailView(Controller[PydanticSerializer]):
     auth = (BearerTokenAuth(),)
 
     def get(self) -> StatementDetailResponse:

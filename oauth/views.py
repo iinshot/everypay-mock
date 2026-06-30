@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from .services import AuthorizeService, OAuthError, ThirdPartyCodeService, TokenService
 
+
 def _parse_basic_auth(request):
     auth = request.META.get("HTTP_AUTHORIZATION", "")
     try:
@@ -16,12 +17,13 @@ def _parse_basic_auth(request):
     except Exception:
         return None, None
 
+
 def _error(message: str, status: int) -> JsonResponse:
     return JsonResponse({"error": message}, status=status)
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class ThirdPartyCodeView(View):
-
     def post(self, request):
         client_id, client_secret = _parse_basic_auth(request)
         if not client_id:
@@ -45,7 +47,6 @@ class ThirdPartyCodeView(View):
 
 
 class AuthorizeView(View):
-
     def get(self, request):
         p = request.GET
         try:
@@ -58,12 +59,16 @@ class AuthorizeView(View):
         except OAuthError as e:
             return _error(e.message, e.status)
 
-        return render(request, "oauth/authorize.html", {
-            "client": client,
-            "third_party": third_party,
-            "companies": companies,
-            "params": p.dict(),
-        })
+        return render(
+            request,
+            "oauth/authorize.html",
+            {
+                "client": client,
+                "third_party": third_party,
+                "companies": companies,
+                "params": p.dict(),
+            },
+        )
 
     def post(self, request):
         p = request.POST
@@ -91,7 +96,6 @@ class AuthorizeView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class TokenView(View):
-
     def post(self, request):
         print("TOKEN VIEW HIT")
         print("BODY:", request.body)
@@ -120,10 +124,12 @@ class TokenView(View):
         except OAuthError as e:
             return _error(e.message, e.status)
 
-        return JsonResponse({
-            "access_token": access_token.token,
-            "token_type": "Bearer",
-            "expires_in": 3600,
-            "refresh_token": refresh_token.token,
-            "scope": access_token.scope,
-        })
+        return JsonResponse(
+            {
+                "access_token": access_token.token,
+                "token_type": "Bearer",
+                "expires_in": 3600,
+                "refresh_token": refresh_token.token,
+                "scope": access_token.scope,
+            }
+        )

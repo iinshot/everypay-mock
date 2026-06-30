@@ -5,100 +5,216 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('banking', '0001_initial'),
+        ("banking", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OAuthClient',
+            name="OAuthClient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Название')),
-                ('client_id', models.CharField(max_length=100, unique=True, verbose_name='Client ID')),
-                ('client_secret', models.CharField(max_length=200, verbose_name='Client Secret')),
-                ('redirect_uris', models.TextField(help_text='По одному на строку', verbose_name='Разрешённые redirect_uri')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Активен')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='oauth_client', to='banking.company', verbose_name='Компания')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Название")),
+                (
+                    "client_id",
+                    models.CharField(
+                        max_length=100, unique=True, verbose_name="Client ID"
+                    ),
+                ),
+                (
+                    "client_secret",
+                    models.CharField(max_length=200, verbose_name="Client Secret"),
+                ),
+                (
+                    "redirect_uris",
+                    models.TextField(
+                        help_text="По одному на строку",
+                        verbose_name="Разрешённые redirect_uri",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(default=True, verbose_name="Активен"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="oauth_client",
+                        to="banking.company",
+                        verbose_name="Компания",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'OAuth клиент',
-                'verbose_name_plural': 'OAuth клиенты',
+                "verbose_name": "OAuth клиент",
+                "verbose_name_plural": "OAuth клиенты",
             },
         ),
         migrations.CreateModel(
-            name='AccessToken',
+            name="AccessToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(max_length=200, unique=True)),
-                ('scope', models.CharField(max_length=200)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('is_revoked', models.BooleanField(default=False)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='banking.company')),
-                ('third_party', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='banking.thirdparty')),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='oauth.oauthclient')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("token", models.CharField(max_length=200, unique=True)),
+                ("scope", models.CharField(max_length=200)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                ("is_revoked", models.BooleanField(default=False)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="banking.company",
+                    ),
+                ),
+                (
+                    "third_party",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="banking.thirdparty",
+                    ),
+                ),
+                (
+                    "client",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="oauth.oauthclient",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Access token',
-                'verbose_name_plural': 'Access tokens',
+                "verbose_name": "Access token",
+                "verbose_name_plural": "Access tokens",
             },
         ),
         migrations.CreateModel(
-            name='PKCEAuthorizationCode',
+            name="PKCEAuthorizationCode",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=200, unique=True)),
-                ('redirect_uri', models.CharField(max_length=500)),
-                ('scope', models.CharField(max_length=200)),
-                ('code_challenge', models.CharField(max_length=200)),
-                ('code_challenge_method', models.CharField(max_length=10)),
-                ('state', models.CharField(blank=True, max_length=200)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('is_used', models.BooleanField(default=False)),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='oauth.oauthclient')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='banking.company')),
-                ('third_party', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='banking.thirdparty')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=200, unique=True)),
+                ("redirect_uri", models.CharField(max_length=500)),
+                ("scope", models.CharField(max_length=200)),
+                ("code_challenge", models.CharField(max_length=200)),
+                ("code_challenge_method", models.CharField(max_length=10)),
+                ("state", models.CharField(blank=True, max_length=200)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                ("is_used", models.BooleanField(default=False)),
+                (
+                    "client",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="oauth.oauthclient",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="banking.company",
+                    ),
+                ),
+                (
+                    "third_party",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="banking.thirdparty",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Authorization code',
-                'verbose_name_plural': 'Authorization codes',
+                "verbose_name": "Authorization code",
+                "verbose_name_plural": "Authorization codes",
             },
         ),
         migrations.CreateModel(
-            name='RefreshToken',
+            name="RefreshToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(max_length=200, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('is_used', models.BooleanField(default=False)),
-                ('access_token', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='refresh_token', to='oauth.accesstoken')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("token", models.CharField(max_length=200, unique=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                ("is_used", models.BooleanField(default=False)),
+                (
+                    "access_token",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="refresh_token",
+                        to="oauth.accesstoken",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Refresh token',
-                'verbose_name_plural': 'Refresh tokens',
+                "verbose_name": "Refresh token",
+                "verbose_name_plural": "Refresh tokens",
             },
         ),
         migrations.CreateModel(
-            name='ThirdPartyCode',
+            name="ThirdPartyCode",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=200, unique=True)),
-                ('user_id', models.CharField(max_length=200, verbose_name='ID пользователя')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('is_used', models.BooleanField(default=False)),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='oauth.oauthclient')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=200, unique=True)),
+                (
+                    "user_id",
+                    models.CharField(max_length=200, verbose_name="ID пользователя"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                ("is_used", models.BooleanField(default=False)),
+                (
+                    "client",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="oauth.oauthclient",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Third-party code',
-                'verbose_name_plural': 'Third-party codes',
+                "verbose_name": "Third-party code",
+                "verbose_name_plural": "Third-party codes",
             },
         ),
     ]

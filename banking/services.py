@@ -2,6 +2,7 @@ from uuid import UUID
 from django.shortcuts import get_object_or_404
 from .models import Account, StatementRequest
 
+
 class AccountService:
     @staticmethod
     def get_accounts(company):
@@ -10,6 +11,7 @@ class AccountService:
     @staticmethod
     def get_account(account_id: UUID, company) -> Account:
         return get_object_or_404(Account, account_id=account_id, company=company)
+
 
 class StatementService:
     @staticmethod

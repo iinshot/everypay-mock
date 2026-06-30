@@ -4,11 +4,13 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 
+
 class OAuthClient(models.Model):
     """
     Зарегистрированное приложение-клиент.
     Создаётся в админке, client_id/secret выдаётся партнёру.
     """
+
     name = models.CharField(max_length=200, verbose_name="Название")
     client_id = models.CharField(max_length=100, unique=True, verbose_name="Client ID")
     client_secret = models.CharField(max_length=200, verbose_name="Client Secret")
@@ -39,11 +41,13 @@ class OAuthClient(models.Model):
         allowed = [u.strip() for u in self.redirect_uris.splitlines() if u.strip()]
         return uri in allowed
 
+
 class ThirdPartyCode(models.Model):
     """
     Короткоживущий код привязанный к клиенту и user_id.
     Живёт 10 минут, одноразовый.
     """
+
     code = models.CharField(max_length=200, unique=True)
     client = models.ForeignKey(OAuthClient, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=200, verbose_name="ID пользователя")
@@ -64,12 +68,14 @@ class ThirdPartyCode(models.Model):
     def is_valid(self) -> bool:
         return not self.is_used and timezone.now() < self.expires_at
 
+
 class PKCEAuthorizationCode(models.Model):
     """
     Код авторизации после подтверждения на странице authorize.
     Содержит code_challenge для проверки PKCE.
     Живёт 10 минут, одноразовый.
     """
+
     code = models.CharField(max_length=200, unique=True)
     client = models.ForeignKey(OAuthClient, on_delete=models.CASCADE)
     company = models.ForeignKey("banking.Company", on_delete=models.CASCADE)
@@ -105,11 +111,13 @@ class PKCEAuthorizationCode(models.Model):
             return self.code_challenge == challenge
         return False
 
+
 class AccessToken(models.Model):
     """
     Bearer-токен для авторизации запросов к API.
     Живёт 1 час.
     """
+
     token = models.CharField(max_length=200, unique=True)
     client = models.ForeignKey(OAuthClient, on_delete=models.CASCADE)
     company = models.ForeignKey("banking.Company", on_delete=models.CASCADE)
@@ -134,11 +142,13 @@ class AccessToken(models.Model):
         self.is_revoked = True
         self.save(update_fields=["is_revoked"])
 
+
 class RefreshToken(models.Model):
     """
     Refresh-токен для получения новой пары токенов.
     Живёт 24 часа, одноразовый.
     """
+
     token = models.CharField(max_length=200, unique=True)
     access_token = models.OneToOneField(
         AccessToken,
